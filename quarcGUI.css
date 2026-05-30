@@ -1,0 +1,285 @@
+/*
+Styling for the QuARC GUI.
+Styling HTML buttons beyond default aesthetics.
+Media queries to alter button and text sizing for smaller browser windows
+and devices.
+*/
+/*
+button {
+   height: 60px !important;
+}
+*/
+
+/* Start/stop design, created by Simon */
+
+.daqbutton {
+    display: inline-block;
+    padding: 1ex 1em;
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-size: 18pt;
+    /*    font-size: 24px; */
+    /*    width: 210px; */
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 0 9px grey;
+}
+
+.daqbuttonfixed {
+    /*    width: 210px; */
+    position: absolute;
+    top: 100px;
+    left: 40px;
+    z-index: 2;
+}
+
+.daqbutton:active {
+    /*   background-color: #0f0; */
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+}
+
+/* --- Overlay Layout Strategy ---
+   Move the controls from a static block to an absolute position
+   so they float ON TOP of the chart, acting like a transparent legend. 
+   
+   Adjustments:
+   Top: Pushes it down clear of the title area.
+   Left: Clears the y-axis labels.
+   Transparency: Ensures the graph is visible underneath. 
+*/
+/* --- Overlay Controls (Refactored) --- */
+.overlay-controls {
+    position: absolute;
+    /* top and left set by quarcD3GUI.js to track chart margins (M.top, M.left) */
+    z-index: 100;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    background: transparent;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+/* Row Styling */
+.control-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Spacing between elements in a row */
+}
+
+/* Checkbox & Label Styling */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: midnightblue;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    accent-color: cornflowerblue;
+    cursor: pointer;
+}
+
+/* Input Group Styling */
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: slategray;
+    font-weight: 600;
+}
+
+.inline-input {
+    width: 60px;
+    padding: 2px 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: midnightblue;
+    text-align: right;
+}
+
+.inline-input:focus {
+    outline: none;
+    border-color: cornflowerblue;
+}
+
+/* Unit label */
+.unit {
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+/* Remove old stats styling if handled elsewhere, but keeping for now */
+.stat-item {
+    font-size: 0.9rem;
+    color: slategray;
+    font-weight: 500;
+}
+
+.stat-item span {
+    color: midnightblue;
+    font-weight: 700;
+}
+
+svg {
+    display: block;
+    overflow: visible;
+    /* V12: ensure axis labels outside margins are not clipped */
+}
+
+/* Axis & Grid */
+.axis text {
+    fill: slategray;
+    font-size: 14px;
+}
+
+.axis path,
+.axis line {
+    stroke: lightsteelblue;
+}
+
+.axis-label {
+    fill: slategray;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.grid line {
+    stroke: lavender;
+}
+
+.grid path {
+    display: none;
+}
+
+
+
+
+
+/* .bar.positive { fill:#2563eb; } blue */
+.bar.positive {
+    fill: cornflowerblue;
+    opacity: 1;
+    /* Explicitly Solid */
+}
+
+/* Right Detector (Salmon) */
+.bar.right {
+    fill: salmon;
+    opacity: 0.5;
+    /* Transparent to show overlap */
+}
+
+/* .bar.negative { fill:#ef4444; } red */
+.bar.negative {
+    fill: mediumspringgreen;
+}
+
+
+/* Error Bars (V10) */
+.error-line {
+    stroke: black;
+    stroke-width: 1px;
+    /* Optional: cap style if needed */
+    stroke-linecap: butt;
+}
+
+
+/* ===== Overlay line styling (V7.1 with V6 Colors) ===== */
+.overlay-line {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+/* Kelleter curve */
+.overlay-line.keller {
+    stroke: goldenrod;
+    /* V6 Color */
+}
+
+/* Bortfeld(t) curve */
+.overlay-line.bortfeldt {
+    stroke: teal;
+    /* V6 Color */
+}
+
+/* Peak Dots (V7 Feature with V6 Colors) */
+.peak-dot {
+    fill: none;
+    stroke: black;
+    stroke-width: 2px;
+}
+
+.peak-dot.keller {
+    fill: goldenrod;
+}
+
+.peak-dot.bortfeldt {
+    fill: teal;
+}
+
+/* --- DAQ Control Button (Bottom of Diagnostics) --- */
+.daq-controls {
+    margin-top: 1ex;
+    padding-top: 1.5rem;
+    border-top: 2px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.daq-button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    background: cornflowerblue;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.daq-button:hover {
+    background: #5a7fc7;
+    transform: translateY(-1px);
+}
+
+.daq-button:active {
+    transform: translateY(0);
+}
+
+.daq-button.running {
+    background: #ef4444;
+}
+
+.daq-button.running:hover {
+    background: #dc2626;
+}
+
+.daq-status {
+    text-align: center;
+    font-size: 0.85rem;
+    color: slategray;
+    font-weight: 500;
+}

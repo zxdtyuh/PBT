@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!--
+@author: Simon Jolly / Danial Saeed
+@email: s.jolly@ucl.ac.uk
+@reference: HTML base code for the LIVE web display for the QuARC.
+-->
+<html lang="en">
+
+<head>
+
+    <title>UCL HEP PBT QuARC Live GUI</title>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script type="text/javascript" src="live_loader.js" defer></script>
+    <script type="text/javascript" src="quarcD3GUI.js" defer></script>
+    <script type="text/javascript" src="quarcXTracker.js" defer></script>
+
+    <link rel="stylesheet" type="text/css" href="quarcBaseLayout.css" />
+    <link rel="stylesheet" type="text/css" href="quarcGUI.css" />
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="plotBox" id="plotArea">
+            
+                <!-- Controls (Overlay) -->
+            <div class="controls overlay-controls">
+                <details open>
+                    <summary style="font-weight: bold; cursor: pointer; user-select: none;">Control Panel</summary>
+                    <div style="margin-top: 10px;">
+                <!-- Line 1: Auto Scale -->
+                <div class="control-row">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoScale" checked> Auto
+                    </label>
+                    <span class="input-group">
+                        <span class="label">X:</span>
+                        <input type="number" id="xMaxInput" class="inline-input" step="1">
+                        <span class="unit">mm</span>
+                    </span>
+                    <span class="input-group">
+                        <span class="label">Y-Max:</span>
+                        <input type="number" id="yMaxInput" class="inline-input" step="1">
+                        <span class="unit">pC</span>
+                    </span>
+                    <span class="input-group">
+                        <span class="label">Y-Min:</span>
+                        <input type="number" id="yMinInput" class="inline-input" step="1">
+                        <span class="unit">pC</span>
+                    </span>
+                </div>
+
+                <!-- Line 2: Kelleter Fit -->
+                <div class="control-row">
+                    <label class="checkbox-label" style="margin-right: 15px;">
+                        <input type="checkbox" id="toggleKelL"> Kelleter (LHS)
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="toggleKelR" checked> Kelleter (RHS)
+                    </label>
+                </div>
+
+                <!-- Line 3: Bortfeld Fit -->
+                <div class="control-row">
+                    <label class="checkbox-label" style="margin-right: 15px;">
+                        <input type="checkbox" id="toggleBortL"> Bortfeldt (LHS)
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="toggleBortR" checked> Bortfeldt (RHS)
+                    </label>
+                </div>
+
+                <!-- Line 4: Cumulative Difference & Visibility Toggles -->
+                <div class="control-row">
+                    <label class="checkbox-label" style="margin-right: 15px;">
+                        <input type="checkbox" id="toggleDiff" checked> Difference Plot
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="toggleSpot" checked> Beam Position
+                    </label>
+                </div>
+                    </div>
+                </details>
+            </div>
+
+            <svg id="chart"></svg>
+            
+        </div> <!-- plotBox closer -->
+
+        <!-- Beam Spot Crosshair Column -->
+        <div class="spotBox" id="spotArea">
+            <svg id="spotChart"></svg>
+        </div> <!-- spotBox closer -->
+
+        <div class="diagBox">
+
+            <button id="DAQbutton" class="daqbutton green" onclick="toggleLive()">Measure</button>
+
+            <div class="statusBox" style="margin-top:20px;">
+                <h3>Console</h3>
+                <p id="content">
+                    Waiting to start measurement...
+                </p>
+            </div>
+
+        </div> <!-- diagBox closer -->
+
+        <div class="clear"></div>
+
+    </div> <!-- container closer -->
+
+<script>
+// Runs after all scripts — overrides quarcD3GUI.js requestUpdate for live mode
+window.addEventListener('load', function() {
+    requestUpdate = function() {
+        forceUpdate = true;
+        if (!liveRunning && lastDataSlice) {
+            plotGraph(lastDataSlice);
+        }
+    };
+});
+</script>
+</body>
+
+</html>

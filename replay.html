@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!--
+@author: Simon Jolly
+@email: s.jolly@ucl.ac.uk
+@reference: HTML base code required for the web display for the QuARC.
+Imports the required JavaScript libraries and links to the developed scripts.
+Defines user-control buttons with minimal CSS.
+-->
+<html lang="en">
+
+<head>
+
+    <title>UCL HEP PBT QuARC Replay GUI</title>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <!-- <script src="d3.v4.13.0/d3.min.js"></script> -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script type="text/javascript" src="listFiles.js"></script>
+
+    <script type="text/javascript" src="quarcD3GUI.js" defer></script>
+    <script type="text/javascript" src="quarcXTracker.js" defer></script>
+
+    <script type="text/javascript">
+        //rootDir = '/GUIData/';
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="quarcBaseLayout.css" />
+    <link rel="stylesheet" type="text/css" href="quarcGUI.css" />
+    <!-- Load papaparse.js (parsing library for data) -->
+    <!-- <script src="papaparse.min.js"></script> -->
+
+</head>
+
+<body onload="javascript:getFileData('json')">
+
+    <!-- <h1 id="maintitle" class="centred">UCL HEP PBT QuARC Replay GUI</h1> -->
+
+    <div class="container">
+
+        <div class="plotBox" id="plotArea">
+
+            <!-- Controls (Overlay) -->
+            <div class="controls overlay-controls">
+
+                <!-- Line 1: Auto Scale -->
+                <div class="control-row">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoScale" checked> Auto
+                    </label>
+                    <span class="input-group">
+                        <span class="label">X:</span>
+                        <input type="number" id="xMaxInput" class="inline-input" step="1">
+                        <span class="unit">mm</span>
+                    </span>
+                    <span class="input-group">
+                        <span class="label">Y-Max:</span>
+                        <input type="number" id="yMaxInput" class="inline-input" step="1">
+                        <span class="unit">pC</span>
+                    </span>
+                    <span class="input-group">
+                        <span class="label">Y-Min:</span>
+                        <input type="number" id="yMinInput" class="inline-input" step="1">
+                        <span class="unit">pC</span>
+                    </span>
+                </div>
+
+                <!-- Line 2: Kelleter Fit -->
+                <div class="control-row">
+                    <label class="checkbox-label" style="margin-right: 15px;">
+                        <input type="checkbox" id="toggleKelL"> Kelleter (LHS)
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="toggleKelR" checked> Kelleter (RHS)
+                    </label>
+                </div>
+
+                <!-- Line 3: Bortfeld Fit -->
+                <div class="control-row">
+                    <label class="checkbox-label" style="margin-right: 15px;">
+                        <input type="checkbox" id="toggleBortL"> Bortfeldt (LHS)
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="toggleBortR" checked> Bortfeldt (RHS)
+                    </label>
+                </div>
+
+                <!-- Line 4: Cumulative Difference -->
+                <div class="control-row">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="toggleDiff" checked> Difference Plot
+                    </label>
+                </div>
+            </div>
+
+            <svg id="chart"></svg>
+        </div> <!-- plotBox closer -->
+
+        <!-- Beam Spot Crosshair Column -->
+        <div class="spotBox" id="spotArea">
+            <svg id="spotChart"></svg>
+        </div> <!-- spotBox closer -->
+
+        <div class="diagBox">
+
+            <button id="DAQbutton" class="daqbutton grey" onclick="toggleButtonState()">Wait</button>
+
+            <!-- V11.5 Scrubber Slider -->
+            <div class="scrub-box" style="margin-top: 15px; margin-bottom: 15px;">
+                <h3 style="margin-bottom: 5px; font-size: 16px;">Scrub Frame: <span id="frameReadout">1</span></h3>
+                <input type="range" id="frameSlider" min="1" max="100" value="1" disabled style="width: 100%;">
+            </div>
+
+            <h3>Select data file:</h3>
+
+            <div class="fileSelector">
+                <p>Dataset:
+                    <select name="dirs" id="dirs">
+                        <option value="" selected="selected">Data Directory</option>
+                    </select>
+                </p>
+
+                <p>Data File:
+                    <select name="files" id="files">
+                        <option value="" selected="selected">Select directory to view files</option>
+                    </select>
+                </p>
+            </div>
+
+            <div class="statusBox">
+
+                <h3>Console</h3>
+                <p id="content">
+                    Loading directory data...
+                </p>
+            </div>
+
+        </div> <!-- diagBox closer -->
+
+        <div class="clear"></div>
+
+    </div> <!-- container closer -->
+
+</body>
+
+</html>

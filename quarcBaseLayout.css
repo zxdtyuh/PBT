@@ -1,0 +1,256 @@
+/*
+Styling for the QuARC GUI.
+Basic page layout.
+*/
+
+html {
+  height: 100%;
+}
+
+body {
+  /*     display: grid; */
+  /*     grid-template-rows: auto 1fr; */
+  background-color: white;
+  color: black;
+  /*     margin: 1ex 1em; */
+  margin: 0;
+  /*     padding: 1ex 1em; */
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', "Bitstream Vera Sans", sans-serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  padding: 0;
+  /* Remove padding to use full screen */
+  height: 100vh;
+  width: 100vw;
+  /* Full viewport height */
+  overflow: hidden;
+  /* Prevent scrolling */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+b,
+em,
+strong {
+  font-weight: bolder;
+  margin: 0;
+}
+
+p {
+  margin: 0 0 1.12em 0;
+}
+
+h1 {
+  font-size: 3em;
+  text-align: left;
+  margin-bottom: 0.25em;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin-bottom: .75em;
+  text-align: left;
+}
+
+h3 {
+  font-size: 1.17em;
+  margin-bottom: .83em;
+  text-align: left;
+}
+
+h4 {
+  font-size: 1em;
+  margin-bottom: 1.12em;
+}
+
+.bottom {
+  position: relative;
+  bottom: 0;
+  margin-top: 1ex;
+}
+
+.hidden {
+  display: none;
+}
+
+.clear {
+  clear: both;
+  display: block;
+}
+
+.block {
+  display: block;
+}
+
+.block:after {
+  clear: both;
+}
+
+.inlineblock {
+  display: inline-block;
+}
+
+.scaled {
+  max-width: 96%;
+  width: auto;
+  height: auto;
+}
+
+.halfscaled {
+  max-width: 50%;
+  width: auto;
+  height: auto;
+}
+
+.left {
+  float: left;
+  padding-right: 1em;
+}
+
+.leftPad {
+  float: left;
+  padding-right: 8em;
+}
+
+.right {
+  float: right;
+  padding-left: 1em;
+}
+
+.centred {
+  text-align: center;
+}
+
+.justified {
+  text-align: justify;
+}
+
+.lefttext {
+  text-align: left;
+}
+
+.righttext {
+  text-align: right;
+}
+
+rect {
+  stroke: black;
+  stroke-width: 0.5px;
+}
+
+.grey {
+  background-color: grey;
+}
+
+.grey:hover {
+  background-color: grey;
+}
+
+.green {
+  background-color: #0c0;
+  /* Green */
+}
+
+.green:hover {
+  background-color: green;
+  /* Green */
+}
+
+.green:active {
+  background-color: green;
+}
+
+.pink {
+  background-color: #f0c;
+  /* Pink */
+}
+
+.pink:hover {
+  background-color: #f0f;
+  /* Pink */
+}
+
+.pink:active {
+  background-color: #f0f;
+}
+
+.red {
+  background-color: #c00;
+  /* red */
+}
+
+.red:hover {
+  background-color: red;
+  /* Red */
+}
+
+.red:active {
+  background-color: red;
+}
+
+.blue {
+  background-color: #00c;
+  /* Blue */
+}
+
+.blue:hover {
+  background-color: blue;
+  /* Blue */
+}
+
+.blue:active {
+  background-color: blue;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: inherit;
+}
+
+.plotBox {
+  flex: 62;
+  /* Takes ~62% width — narrowed to make room for spot tracker column */
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.spotBox {
+  flex: 18;
+  /* Takes ~18% width — beam spot crosshair column */
+  position: relative;
+  height: 100%;
+  border-left: 1px solid silver;
+  overflow: hidden;
+}
+
+.diagBox {
+  flex: 20;
+  /* Takes 20% width */
+  background: gainsboro;
+  /* Light grey for terminal feel */
+  border-left: 1px solid silver;
+  padding: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+}
+
+.statusBox {
+  width: 95%;
+  max-height: 30ex;
+  margin: 0;
+  margin-right: 1em;
+  padding: 0.5ex 1em;
+  border: 2px solid lightgrey;
+  overflow-y: scroll;
+  /*     background: white; */
+}
