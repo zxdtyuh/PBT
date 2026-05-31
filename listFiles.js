@@ -10,7 +10,7 @@ var fileLoaded = false;
 function getFileData(fileExt = "json") {
   let display = document.getElementById("content");
   let xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", "/list"); // Forces Python Server to run server_file_list()
+  xmlhttp.open("GET", "/replay.py/list"); // Forces Python Server to run list() from replay.py
   xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xmlhttp.send();
   xmlhttp.onreadystatechange = function () {

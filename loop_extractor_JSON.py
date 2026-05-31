@@ -138,6 +138,7 @@ class Simple25HzExtractor:
             print("\n✓ Stopped via Ctrl+C")
 
 
-if __name__ == "__main__":
-    extractor = Simple25HzExtractor()
-    extractor.run()
+def loop_extractor_JSON():
+    if __name__ == "__main__":
+        extractor = Simple25HzExtractor()
+        extractor.run()

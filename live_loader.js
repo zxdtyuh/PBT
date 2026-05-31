@@ -52,7 +52,7 @@ function toggleLive() {
         btn.innerText = 'Measure';
     } else {
         liveRunning = true;
-        fetch('/loop_extractor') // trigger Python loop extractor
+        fetch('/loop_extractor_JSON.py') // trigger Python loop extractor
             .catch(e => console.warn('Start signal failed:', e));
         document.getElementById('content').innerHTML = 'Measurement running...';
         const btn = document.getElementById('DAQbutton');
@@ -79,7 +79,7 @@ async function runLiveLoop() {
     while (liveRunning) {
         const start = performance.now();
         try {
-            const response = await fetch('bars_live.json?' + Date.now(), { cache: 'no-store' });
+            const response = await fetch('bars_live.json', { cache: 'no-store' });
             if (response.ok) {
                 const text = await response.text();
                 if (text.trim() !== '') {
