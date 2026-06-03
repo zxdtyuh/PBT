@@ -7,27 +7,22 @@ var headerHeight;
 var plotWidth;
 var fileLoaded = false;
 
+// Updated to use fetch instead of XMLHttp
+
 function getFileData(fileExt = "json") {
   let display = document.getElementById("content");
-  let xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", "/replay.py/list"); // Forces Python Server to run list() from replay.py
-  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  xmlhttp.send();
-  xmlhttp.onreadystatechange = function () {
-    if (this.readyState === 4 && this.status === 200) {
-      display.innerHTML = "Data files loaded: select a file";
-      let loadedJSON = this.responseText;
-      // console.log(loadedJSON);
-      let fileList = JSON.parse(loadedJSON);
-      // fileLoaded = true;
-      console.log(fileList);
-      populateMenus(fileList);
-      // getHeaderHeight();
-      getPlotAreaWidth()
-    } else {
-      display.innerHTML = "Waiting for data to load...";
-    };
-  }
+  fetch('/replay.py/list')
+  .then(response => response.json())
+  .then(fileList => {
+    console.log(fileList);
+    display.innerHTML = "Data files loaded: select a file";
+    populateMenus(fileList);
+    getPlotAreaWidth();
+  })
+  .catch(e => {
+    console.warn('File list fetch failed:', e);
+        display.innerHTML = "Waiting for data to load...";
+  });
 }
 
 // Find and set height of header banner
@@ -183,25 +178,30 @@ function refreshDisplay() {
   display.innerHTML += "<br />Data loaded for plotting<br />";
 }
 
-function readTXTHeader() {
-  dirMenu = document.querySelector('#dirs');
-  directory = dirMenu.options[dirMenu.selectedIndex].value;
-  fileMenu = document.querySelector('#files');
-  file = fileMenu.options[fileMenu.selectedIndex].value;
-  let display = document.getElementById("content");
-  let xmlhttp = new XMLHttpRequest();
-  let execString = 'readHeader.php?rootDir=' + rootDir + '&dataDir=' + directory +
-    '&dataFile=' + file + '&debug=true';
-  display.innerHTML = execString;
-  xmlhttp.open("GET", execString);
-  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  xmlhttp.send();
-  xmlhttp.onreadystatechange = function () {
-    if (this.readyState === 4 && this.status === 200) {
-      display.innerHTML = this.responseText;
-    } else {
-      display.innerHTML = "Checking file header...";
-    };
-  }
-}
+
+
+
+// Moving away from txt files
+
+// function readTXTHeader() {   
+//   dirMenu = document.querySelector('#dirs');
+//   directory = dirMenu.options[dirMenu.selectedIndex].value;
+//   fileMenu = document.querySelector('#files');
+//   file = fileMenu.options[fileMenu.selectedIndex].value;
+//   let display = document.getElementById("content");
+//   let xmlhttp = new XMLHttpRequest();
+//   let execString = 'readHeader.php?rootDir=' + rootDir + '&dataDir=' + directory +
+//     '&dataFile=' + file + '&debug=true';
+//   display.innerHTML = execString;
+//   xmlhttp.open("GET", execString);
+//   xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+//   xmlhttp.send();
+//   xmlhttp.onreadystatechange = function () {
+//     if (this.readyState === 4 && this.status === 200) {
+//       display.innerHTML = this.responseText;
+//     } else {
+//       display.innerHTML = "Checking file header...";
+//     };
+//   }
+// }
 
