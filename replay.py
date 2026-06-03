@@ -1,7 +1,7 @@
 import os
 import json
 
-
+# Grabs list of JSON files to populate the dropdown menu
 def list(self, file_ext="json"):
         result = {}
         for entry in os.scandir("GUIData"): #Scans the GUIData folder for subfolders and files (must be in same directory as PythonWebserver.py)
