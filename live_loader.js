@@ -15,36 +15,11 @@ let lastDataSlice = null; // stores last received frame for checkbox redraws whe
 // Safe stub so quarcD3GUI.js requestUpdate() never crashes on dataJSON.right
 let dataJSON = new Proxy({}, { get: () => null });
 
-// Called by the Measure/Stop button in live.html
-// function toggleLive() {
-//     if (liveRunning) {
-//         liveRunning = false;
-//         fetch('php_backend/executeDAQ.php?command=STOP')
-//             .catch(e => console.warn('Stop signal failed:', e));
-//         document.getElementById('content').innerHTML = 'Measurement stopped.';
-//         const btn = document.getElementById('DAQbutton');
-//         btn.classList.remove('red');
-//         btn.classList.add('green');
-//         btn.innerText = 'Measure';
-//     } else {
-//         liveRunning = true;
-//         fetch('php_backend/executeDAQ.php?command=MEASURE_CONTINUOUS')
-//             .catch(e => console.warn('Start signal failed:', e));
-//         document.getElementById('content').innerHTML = 'Measurement running...';
-//         const btn = document.getElementById('DAQbutton');
-//         btn.classList.remove('green');
-//         btn.classList.add('red');
-//         btn.innerText = 'Stop';
-//         runLiveLoop();
-//     }
-// }
 
-// New for Python -Sam 27/5/2026
+// New for Python, translated from old code -Sam 27/5/2026
 function toggleLive() {
     if (liveRunning) {
         liveRunning = false;
-        fetch('php_backend/executeDAQ.php?command=STOP')
-            .catch(e => console.warn('Stop signal failed:', e));
         document.getElementById('content').innerHTML = 'Measurement stopped.';
         const btn = document.getElementById('DAQbutton');
         btn.classList.remove('red');
