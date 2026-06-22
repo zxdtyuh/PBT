@@ -1,10 +1,8 @@
 # Python server for KriaDAQ
 # Sam Harris sdh25@ic.ac.uk
-# V1.0 31/05/2026
+# Last updated: 04/06/2026
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import json
-import time
 import os
 import sys
 import inspect
@@ -16,7 +14,14 @@ FileTypes = { ".json":"application/json",
               ".js": "application/javascript",
               ".css":"text/css",
               ".htm": "text/html",
-              ".html": "text/html"}
+              ".html": "text/html",
+              ".png": "image/png",
+              ".jpg": "image/jpeg",
+              ".jpeg": "image/jpeg",
+              ".gif": "image/gif",
+              ".ico": "image/x-icon",
+              ".txt": "text/plain"
+              }
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):

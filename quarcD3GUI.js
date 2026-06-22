@@ -139,7 +139,7 @@ const formattedDate2 = currentDate.toLocaleDateString('en-UK', options);
 
 let directorySel = document.getElementById("dirs");
 let fileSel = document.getElementById("files");
-if (fileSel) {     // Check if file selector exists for live version -Sam 27/5/2026
+if (fileSel) {
     fileSel.addEventListener("change", () => {
         fileMenu = document.querySelector('#files');
         file = fileMenu.options[fileMenu.selectedIndex].value;
@@ -151,7 +151,7 @@ if (fileSel) {     // Check if file selector exists for live version -Sam 27/5/2
         curFrame = 1;
         // console.log("File selector menu changed; files loaded is " + fileLoaded);
         setButtonState();
-});
+    });
 }
 
 // Check and set button colour and text
@@ -459,18 +459,13 @@ function makeGraph(dataSlice) {
         .domain([d3.min(x0), d3.max(x0)])
         .range([X_PAD, innerW]);
 
+    // Y-axis upper limit: use FSR * 1.2 as minimum scale if input available
+    const fsrInput = document.getElementById("FSRInput");
+    const fsrMax = fsrInput ? parseFloat(fsrInput.value) * 1.2 : 5;
     y = d3.scaleLinear()
-        .domain([0, Math.max(5, d3.max(pdRight) + 1)]) // pixel height of scale
+        .domain([0, Math.max(fsrMax, d3.max(pdRight) + 1)])
         .range([innerH, 0])
         .nice();
-
-    // --- V9 Feature: Link Overlay to JS Margins --- overudes style.css 
-    const overlay = document.querySelector(".overlay-controls");
-    if (overlay) {
-        // Use M.top to align with the top of the Y-axis
-        overlay.style.top = `${M.top + 120}px`;
-        // can also add offsets: `${M.top + 10}px`
-    }
 
     let currentWidthsPx = getWidthsPx(bandwidths, x, x0, SHRINK_FACTOR);
 
@@ -1020,7 +1015,7 @@ const resizeObserver = new ResizeObserver(() => {
         positionOverlay();
 
         // Re-render current frame if data is loaded
-        if (typeof dataJSON !== 'undefined' && dataJSON.right) {
+        if (typeof dataJSON !== 'undefined' && dataJSON !== null && dataJSON.right) {
             dataSlice = loadDataSlice(dataJSON, curFrame);
             plotGraph(dataSlice);
         }

@@ -12,27 +12,25 @@
 
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script type="text/javascript" src="live_loader.js" defer></script>
+    <script src="d3.v7.min.js"></script>
     <script type="text/javascript" src="quarcD3GUI.js" defer></script>
     <script type="text/javascript" src="quarcXTracker.js" defer></script>
+    <script type="text/javascript" src="live_loader.js" defer></script>
 
     <link rel="stylesheet" type="text/css" href="quarcBaseLayout.css" />
     <link rel="stylesheet" type="text/css" href="quarcGUI.css" />
 
 </head>
 
-<body>
+<body onload="javascript:initLive()">
 
     <div class="container">
 
         <div class="plotBox" id="plotArea">
-            
-                <!-- Controls (Overlay) -->
+
+            <!-- Controls (Overlay) -->
             <div class="controls overlay-controls">
-                <details open>
-                    <summary style="font-weight: bold; cursor: pointer; user-select: none;">Control Panel</summary>
-                    <div style="margin-top: 10px;">
+
                 <!-- Line 1: Auto Scale -->
                 <div class="control-row">
                     <label class="checkbox-label">
@@ -75,21 +73,15 @@
                     </label>
                 </div>
 
-                <!-- Line 4: Cumulative Difference & Visibility Toggles -->
+                <!-- Line 4: Cumulative Difference -->
                 <div class="control-row">
-                    <label class="checkbox-label" style="margin-right: 15px;">
+                    <label class="checkbox-label">
                         <input type="checkbox" id="toggleDiff" checked> Difference Plot
                     </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="toggleSpot" checked> Beam Position
-                    </label>
                 </div>
-                    </div>
-                </details>
             </div>
 
             <svg id="chart"></svg>
-            
         </div> <!-- plotBox closer -->
 
         <!-- Beam Spot Crosshair Column -->
@@ -99,9 +91,75 @@
 
         <div class="diagBox">
 
-            <button id="DAQbutton" class="daqbutton green" onclick="toggleLive()">Measure</button>
+            <button id="DAQbutton" class="daqbutton grey" onclick="toggleButtonState()">Measure</button>
 
-            <div class="statusBox" style="margin-top:20px;">
+            <!-- DAQ Configuration Inputs -->
+            <div class="daqConfig" style="margin-top:15px;">
+
+                <div class="config-row">
+                    <label>File name:</label>
+                    <input type="text" id="fileName" placeholder="Run001" onclick="setInitialFileName()">
+                    <label><input type="checkbox" id="checkbox_bck"> Background</label>
+                </div>
+
+                <div class="config-row">
+                    <label>Boards:</label>
+                    <select id="boardsInput">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </div>
+
+                <div class="config-row">
+                    <label>FSR (pC):</label>
+                    <select id="FSRInput">
+                        <option value="12.5">12.5</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="150">150</option>
+                        <option value="200">200</option>
+                        <option value="250">250</option>
+                        <option value="300">300</option>
+                        <option value="350">350</option>
+                    </select>
+                </div>
+
+                <div class="config-row">
+                    <label>t<sub>INT</sub> (μs):</label>
+                    <input type="number" id="tINTInput" min="170" value="170">
+                    <span id="error-tINT" style="color:red; display:none;">Min 170 μs</span>
+                </div>
+
+                <div class="config-row">
+                    <label>Measurements:</label>
+                    <input type="number" id="measInput" min="1" placeholder="e.g. 10000">
+                </div>
+
+                <div class="config-row">
+                    <label>Run time (s):</label>
+                    <input type="number" id="measTimeInput" step="0.1" placeholder="e.g. 10.0">
+                </div>
+
+            </div> <!-- daqConfig closer -->
+
+            <!-- Progress Bar -->
+            <div style="margin-top:10px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:slategray; margin-bottom:3px;">
+                    <span>Progress</span>
+                    <span id="progressLabel">0 / 0</span>
+                </div>
+                <div style="background:#ddd; border-radius:4px; height:14px; width:100%;">
+                    <div id="progressBar" style="background:cornflowerblue; height:14px; border-radius:4px; width:0%; transition:width 0.3s;"></div>
+                </div>
+            </div>
+
+            <div class="statusBox" style="margin-top:10px;">
                 <h3>Console</h3>
                 <p id="content">
                     Waiting to start measurement...
@@ -114,17 +172,6 @@
 
     </div> <!-- container closer -->
 
-<script>
-// Runs after all scripts — overrides quarcD3GUI.js requestUpdate for live mode
-window.addEventListener('load', function() {
-    requestUpdate = function() {
-        forceUpdate = true;
-        if (!liveRunning && lastDataSlice) {
-            plotGraph(lastDataSlice);
-        }
-    };
-});
-</script>
 </body>
 
 </html>
