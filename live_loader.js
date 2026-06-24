@@ -111,7 +111,7 @@ async function toggleButtonState() {
         // Stop
         isRunning = false;
         setButtonState();
-        fetch("executeDAQ.py/stop") // trigger Python stop");
+        fetch("executeDAQ.py/stop", {method: "POST"}); // trigger Python stop");
         document.getElementById("content").innerHTML = "Measurement stopped.";
     } else {
         // Validate required fields
@@ -133,7 +133,11 @@ async function toggleButtonState() {
             "&tINT="         + encodeURIComponent(params.tINT) +
             "&measurements=" + encodeURIComponent(params.measurements) +
             "&refresh="      + encodeURIComponent(params.refresh);
-        fetch("executeDAQ.py/start");
+        fetch("executeDAQ.py/start", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: body
+            });
         // Reset progress bar for new run
         document.getElementById("progressBar").style.width = "0%";
         document.getElementById("progressLabel").innerText = "0 / " + params.measurements;
@@ -163,7 +167,7 @@ function initLive() {
 // Returns true if acquisition has finished ("Stopping")
 async function updateProgress() {
     try {
-        const response = await fetch("../logfile_runningStatus.txt?" + new Date().getTime());
+        const response = await fetch("logfile_runningStatus.txt");
         if (!response.ok) return false;
         const text = await response.text();
 
@@ -204,7 +208,7 @@ async function runLiveLoop() {
         }
 
         try {
-            const response = await fetch("../bars_live.json?" + new Date().getTime());
+            const response = await fetch("bars_live.json");
             if (response.ok) {
                 const text = await response.text();
                 if (text.trim() !== "") {

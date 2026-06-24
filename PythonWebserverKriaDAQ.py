@@ -73,7 +73,7 @@ class MyServer(BaseHTTPRequestHandler):
                         self.end_headers()
                         self.wfile.write(bytes(f"<h1>200 - Successfully executed '{function}' in module '{module}'</h1>", "utf-8"))
                 except Exception as e:
-                    self.send_response(500)
+                    self.send_response(501)
                     self.end_headers()
                     self.wfile.write(bytes(f"<h1>500 - Internal Server Error: Failed to execute function '{function}' in module '{module}'</h1><p>{e}</p>", "utf-8"))
             else:
@@ -86,6 +86,9 @@ class MyServer(BaseHTTPRequestHandler):
             if os.path.exists(self.path.strip("/")) and os.path.isfile(self.path.strip("/")):
                 self.send_response(200)
                 self.send_header("Content-type", FileTypes[ext])
+                self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+                self.send_header("Pragma", "no-cache")
+                self.send_header("Expires", "0")
                 self.end_headers()
                 with open(self.path.strip("/"), "rb") as f:
                     self.wfile.write(f.read()) #Reads the file defined by path
@@ -94,6 +97,8 @@ class MyServer(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(b"<h1>404 - File Not Found</h1>")
 
+    def do_POST(self):
+        self.do_GET()
 
 
 if __name__ == "__main__":  # Start the server

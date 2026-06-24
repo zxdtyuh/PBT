@@ -2,7 +2,7 @@ import subprocess
 import urllib.parse
 
 v4dir   = "/home/pi/GUI/v4"
-script  = v4dir + "/executeFTDI.sh"
+script  = "executeFTDI.sh"
 
 _process = None  # Track the running process
 
@@ -47,3 +47,4 @@ def stop(self):
     self.send_header("Cache-Control", "no-cache, no-store")
     self.end_headers()
     self.wfile.write(b"DAQ stopped.")
+
