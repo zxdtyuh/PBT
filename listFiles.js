@@ -11,7 +11,7 @@ var fileLoaded = false;
 
 function getFileData(fileExt = "json") {
   let display = document.getElementById("content");
-  fetch('/replay.py/list')
+  fetch('replay.py/list', {method: "POST"})
   .then(response => response.json())
   .then(fileList => {
     console.log(fileList);

@@ -29,7 +29,7 @@ class MyServer(BaseHTTPRequestHandler):
 
         ext = ''
 
-        for i, seg in enumerate(path):  # Find file extension regardless of path format
+        for seg in path:  # Find file extension regardless of path format
             e = os.path.splitext(seg)[1]
             if e:
                 ext = e
@@ -40,8 +40,45 @@ class MyServer(BaseHTTPRequestHandler):
             self.path += ".html"
 
 
-        # Address format is /module.ext/function for Python scripts or folder1/folder2/.../module.ext for all other files
+        # Address format is folder1/folder2/.../module.ext for all static files
 
+        if ext == ".py":
+
+            self.send_response(405)  # Method Not Allowed
+            self.end_headers()
+            self.wfile.write(b"<h1>405 - GET disallowed for Python files</h1>")
+
+        elif ext in FileTypes:  # All other non-Python files
+            if os.path.exists(self.path.strip("/")) and os.path.isfile(self.path.strip("/")):
+                self.send_response(200)
+                self.send_header("Content-type", FileTypes[ext])
+                self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+                self.send_header("Pragma", "no-cache")
+                self.send_header("Expires", "0")
+                self.end_headers()
+                with open(self.path.strip("/"), "rb") as f:
+                    self.wfile.write(f.read()) #Reads the file defined by path
+            else:
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(b"<h1>404 - File Not Found</h1>")
+
+
+
+#   Post for Python functions
+#   Format is /module.ext/function for Python scripts
+    def do_POST(self):
+        #self.do_GET()
+        path = os.path.normpath(self.path.strip("/")).split(os.sep)  # Segment path
+
+        ext = ''
+
+        for seg in path:  # Find file extension regardless of path format
+            e = os.path.splitext(seg)[1]
+            if e:
+                ext = e
+                break
+        
         if ext == ".py":
 
             module = os.path.splitext(path[0])[0]
@@ -80,25 +117,10 @@ class MyServer(BaseHTTPRequestHandler):
                 self.send_response(404)
                 self.end_headers()
                 self.wfile.write(bytes(f"<h1>404 - Not Found: Function '{function}' not found in module '{module}'</h1>", "utf-8"))
-
-
-        elif ext in FileTypes:  # All other non-Python files
-            if os.path.exists(self.path.strip("/")) and os.path.isfile(self.path.strip("/")):
-                self.send_response(200)
-                self.send_header("Content-type", FileTypes[ext])
-                self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
-                self.send_header("Pragma", "no-cache")
-                self.send_header("Expires", "0")
-                self.end_headers()
-                with open(self.path.strip("/"), "rb") as f:
-                    self.wfile.write(f.read()) #Reads the file defined by path
-            else:
-                self.send_response(404)
-                self.end_headers()
-                self.wfile.write(b"<h1>404 - File Not Found</h1>")
-
-    def do_POST(self):
-        self.do_GET()
+        else:
+            self.send_response(405)  # Method Not Allowed
+            self.end_headers()
+            self.wfile.write(b"<h1>405 - POST only supported for Python modules</h1>")
 
 
 if __name__ == "__main__":  # Start the server
