@@ -8,11 +8,11 @@ USE work.GK_X_Squared_Table.ALL;
 entity GK_X_Squared is
 
   GENERIC(
-    y_bit       : integer range 0 to 3 := 3;
-    x_bit       : integer range 0 to 10 := 10;
-    MeasureBit  : integer range 0 to 20 := 20;
+    -- y_bit       : integer range 0 to 3 := 3;
+    -- x_bit       : integer range 0 to 10 := 10;
+    -- MeasureBit  : integer range 0 to 20 := 20;
     PointBit    : integer range 0 to 36 := 36;
-    FracBit     : integer range 0 to 17 := 17;
+    -- FracBit     : integer range 0 to 17 := 17;
     GaussNodes  : integer range 0 to 7 := 7;
     KronrodNodes: integer range 0 to 15 := 15
     
@@ -40,6 +40,7 @@ signal KronrodWeight1: unsigned( PointBit - 1 downto 0 ) := (others => '0');
 signal GaussWeight   : unsigned( PointBit - 1 downto 0 ) := (others => '0');
 signal GaussWeight1  : unsigned( PointBit - 1 downto 0 ) := (others => '0');
 signal FunctionRes   : signed( 2 * PointBit + 1 downto 0 ) := (others => '0');
+signal FunctionValid : STD_LOGIC := '0';
 signal GaussFunctionRes: signed( 2 * PointBit + 1 downto 0 ) := (others => '0');
 signal WeightedResult: signed( 3 * PointBit + 1 downto 0 ) := (others => '0');
 signal GaussWeightedResult: signed( 3 * PointBit + 1 downto 0 ) := (others => '0');
@@ -67,6 +68,23 @@ signal ValidG3       : STD_LOGIC := '0';
 
 
 begin
+
+
+Function_Inst : entity work.Function_for_GK
+    generic map (
+        PointBit     => PointBit,
+        GaussNodes   => GaussNodes,
+        KronrodNodes => KronrodNodes
+    )
+    port map (
+        clk          => clk,
+        XNodeIn      => KronrodNode,
+        XNodeValid   => ValidD1,
+        FuncOut      => FunctionRes,
+        FuncOutValid => FunctionValid
+    );
+
+
 PROCESS( clk )
   BEGIN
     IF RISING_EDGE( clk ) THEN
@@ -77,12 +95,15 @@ PROCESS( clk )
         KronrodWeight <= KRONROD_WEIGHTS(NodeCounter);
         SignCounter <= '1';
         
-        if GaussSignCounter = '0' then
-            GaussNode <= -signed('0' & GAUSS_NODES(GaussNodeCounter));
+        if NodeCounter mod 2 = 1 then
             GaussWeight <= GAUSS_WEIGHTS(GaussNodeCounter);
-            GaussSignCounter <= '1';
+            if GaussNodeCounter /= 3 then
+                GaussNodeCounter <= GaussNodeCounter + 1;
+            end if;
             CounterG1 <= GSampleIndex;
-            GSampleIndex <= GSampleIndex + 1;
+            if GSampleIndex /= 6 then
+                GSampleIndex <= GSampleIndex + 1;
+            end if;
             ValidG1 <= '1';
         else
             ValidG1 <= '0';
@@ -91,20 +112,18 @@ PROCESS( clk )
         CounterD1 <= SampleIndex;
         SampleIndex <= SampleIndex + 1;
         ValidD1 <= '1';
+        
     elsif SignCounter = '1' and NodeCounter /= 7 then
         KronrodNode <= signed('0' & KRONROD_NODES(NodeCounter));
         SignCounter <= '0';
         
-        if GaussSignCounter = '1' and GaussNodeCounter /= 3 then
-            GaussNode <= signed('0' & GAUSS_NODES(GaussNodeCounter));
-            GaussSignCounter <= '0';
-            GaussNodeCounter <= GaussNodeCounter + 1;
+        if NodeCounter mod 2 = 1 then
             CounterG1 <= GSampleIndex;
             GSampleIndex <= GSampleIndex + 1;
             ValidG1 <= '1';
-         else 
+        else 
             ValidG1 <= '0';
-         end if;
+        end if;
         
         NodeCounter <= NodeCounter + 1;
         CounterD1 <= SampleIndex;
@@ -112,16 +131,15 @@ PROCESS( clk )
         ValidD1 <= '1';
     else
         ValidD1 <= '0';
+        ValidG1 <= '0';
     end if;
     
     -- Clock 2
     -- Function is x^2
-    FunctionRes <= KronrodNode * KronrodNode;
     KronrodWeight1 <= KronrodWeight;
     CounterD2 <= CounterD1;
     ValidD2 <= ValidD1;
     
-    GaussFunctionRes <= GaussNode * GaussNode;
     GaussWeight1 <= GaussWeight;
     ValidG2 <= ValidG1;
     CounterG2 <= CounterG1;
@@ -131,10 +149,9 @@ PROCESS( clk )
     CounterD3 <= CounterD2;
     ValidD3 <= ValidD2;
     
-    GaussWeightedResult <= GaussFunctionRes * signed(GaussWeight1);
+    GaussWeightedResult <= FunctionRes * signed(GaussWeight1);
     CounterG3 <= CounterG2;
     ValidG3 <= ValidG2;
-    
     
     -- Clock 4
     
@@ -166,9 +183,9 @@ PROCESS( clk )
                     GaussAccumSum <= GaussAccumSum + GaussWeightedResult;
                     GOutValid <= '0';
                 end if;
-            else
-                GOutValid <= '0';
-            end if;
+    else
+        GOutValid <= '0';
+    end if;
 
     END IF;
 END PROCESS;
