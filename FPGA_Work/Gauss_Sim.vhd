@@ -7,10 +7,10 @@ end Gauss_1_SIM;
 
 architecture Sim of Gauss_1_SIM is
     signal clk            : STD_LOGIC := '0';
-    signal X_Measurement  : unsigned( 19 downto 0 );
-    signal Y_Measurement  : unsigned( 19 downto 0 );
+    signal X_Measurement  : unsigned( 29 downto 0 );
+    signal Y_Measurement  : unsigned( 29 downto 0 );
     signal Measure_Valid  : STD_LOGIC := '0';
-    signal EstimateOut    : unsigned( 27 downto 0);
+    signal EstimateOut    : unsigned( 31 downto 0);
     signal OutValid       : STD_LOGIC := '0';
 
 begin
@@ -36,7 +36,7 @@ begin
         wait for 20 ns; -- Start up pause
 
         -- First measurement -- mid-range X
-        X_Measurement <= to_unsigned(520947, 20);
+        X_Measurement <= to_unsigned(2083788, 30);
         Y_Measurement <= (others => '0');  -- unused
         Measure_Valid <= '1';
         wait for 10 ns;
@@ -45,7 +45,7 @@ begin
         wait for 80 ns; -- let the first pipeline finish
 
         -- Second measurement
-        X_Measurement <= to_unsigned(1048, 20);
+        X_Measurement <= to_unsigned(4192, 30);
         Y_Measurement <= (others => '0');
         Measure_Valid <= '1';
         wait for 10 ns;
@@ -54,7 +54,7 @@ begin
         wait for 80 ns;
 
         -- Third measurement -- min X boundary
-        X_Measurement <= to_unsigned(0, 20);
+        X_Measurement <= to_unsigned(0, 30);
         Y_Measurement <= (others => '0');
         Measure_Valid <= '1';
         wait for 10 ns;
@@ -63,7 +63,7 @@ begin
         wait for 80 ns;
 
         -- Fourth measurement -- max X boundary
-        X_Measurement <= to_unsigned(1048575, 20);
+        X_Measurement <= to_unsigned(4194300, 30);
         Y_Measurement <= (others => '0');
         Measure_Valid <= '1';
         wait for 10 ns;
