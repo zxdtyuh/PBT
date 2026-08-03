@@ -10,7 +10,7 @@ entity Bragg_Estimate is
     y_bit       : integer range 0 to 3 := 3;
     x_bit       : integer range 0 to 10 := 10;
     MeasureBit  : integer range 0 to 20 := 20;
-    PointBit    : integer range 0 to 28 := 28;
+    PointBit    : integer range 0 to 32 := 32;
     FracBit     : integer range 0 to 17 := 17
   );
   
