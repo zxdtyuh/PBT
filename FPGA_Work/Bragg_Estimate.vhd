@@ -7,20 +7,23 @@ USE work.LUT.ALL;
 
 entity Bragg_Estimate is
   GENERIC(
-    y_bit       : integer range 0 to 3 := 3;
+    y_bit       : integer range 0 to 4 := 4;
+    yInverseRangeBit: integer range 0 to 4 := 4; -- range of y is .0625, or 2^(-4)
     x_bit       : integer range 0 to 10 := 10;
-    MeasureBit  : integer range 0 to 20 := 20;
+    xRangeBit   : integer range 0 to 9 := 9;
+    xMeasureBit : integer range 0 to 29 := 29;
+    yMeasureBit : integer range 0 to 20 := 20;
     PointBit    : integer range 0 to 32 := 32;
-    FracBit     : integer range 0 to 17 := 17
+    FracBit     : integer range 0 to 20 := 20
   );
   
   
   PORT(
        clk            : IN  STD_LOGIC;
-       X_Measurement  : IN unsigned( MeasureBit - 1 downto 0 );
-       Y_Measurement  : IN unsigned( MeasureBit - 1 downto 0 );
+       X_Measurement  : IN unsigned( xMeasureBit - 1 downto 0 ); -- 9i; 20f
+       Y_Measurement  : IN unsigned( yMeasureBit - 1 downto 0 ); -- 0i; 20f  given as 0 to .0624 for a real range of .4 to .4625
        Measure_Valid  : IN STD_LOGIC;
-       EstimateOut    : OUT unsigned( PointBit - 1 downto 0);
+       jEstimateOut   : OUT unsigned( PointBit - 1 downto 0);
        OutValid       : OUT STD_LOGIC := '0'       
       );
       
@@ -43,12 +46,12 @@ signal FractionY    : unsigned( FracBit - 1 downto 0 ) := (others => '0');
 signal FractionY0   : unsigned( FracBit - 1 downto 0 ) := (others => '0');
 signal FractionY1   : unsigned( FracBit - 1 downto 0 ) := (others => '0');
 signal FractionY2   : unsigned( FracBit - 1 downto 0 ) := (others => '0');
-signal weight1      : unsigned( FracBit downto 0 ) := (others => '0');
-signal weight2      : unsigned( FracBit downto 0 ) := (others => '0');
-signal weight       : unsigned( 2*(FracBit + 1) - 1 downto 0 ) := (others => '0');
+signal weight1      : unsigned( FracBit - 1 downto 0 ) := (others => '0');
+signal weight2      : unsigned( FracBit - 1 downto 0 ) := (others => '0');
+signal weight       : unsigned( 2 * FracBit - 1 downto 0 ) := (others => '0');
 signal LUTOutput    : unsigned( PointBit - 1 downto 0 ) := (others => '0');
-signal LUTWeighted  : unsigned( 2*(FracBit + 1) + PointBit - 1 downto 0) := (others => '0');
-signal AccumSum     : unsigned( 2*(FracBit + 1) + PointBit downto 0) := (others => '0');
+signal LUTWeighted  : unsigned( 2*(FracBit) + PointBit - 1 downto 0) := (others => '0');
+signal AccumSum     : unsigned( 2*(FracBit) + PointBit - 1 downto 0) := (others => '0');
 signal XShifted     : unsigned( (x_bit - 1) downto 0 );
 signal XShifted0    : unsigned( (x_bit - 1) downto 0 );
 signal XShifted1    : unsigned( (x_bit - 1) downto 0 );
@@ -86,25 +89,29 @@ PROCESS( clk )
   BEGIN
     IF RISING_EDGE( clk ) THEN
     
-    
+        -- clock 1
         if Measure_Valid = '1' then
-            XShifted <= X_Measurement( MeasureBit - 1 downto (MeasureBit - x_bit) ); -- shift the measurement down to the range given by the table
-            YShifted <= Y_Measurement( MeasureBit - 1 downto (MeasureBit - y_bit) );
-            
-            if X_Measurement(MeasureBit - 1 downto (MeasureBit - x_bit)) = to_unsigned(2**x_bit - 1, x_bit) then  -- Make sure it doesn't overflow
-                XShiftedNext <= X_Measurement( MeasureBit - 1 downto (MeasureBit - x_bit) );
+            if shift_right(X_Measurement, x_bit + xRangeBit) >= to_unsigned(2**x_bit - 1, xMeasureBit) then
+                XShifted <= to_unsigned(2**x_bit - 1, x_bit);
+                XShiftedNext <= to_unsigned(2**x_bit - 1, x_bit);
+                FractionX <= to_unsigned(0, FracBit);
+                
             else
-                XShiftedNext <= X_Measurement( MeasureBit - 1 downto (MeasureBit - x_bit) ) + 1;
+                XShifted <= resize(shift_right(X_Measurement, x_bit + xRangeBit), x_bit); -- shift the measurement down to the range given by the table   
+                XShiftedNext <= resize(shift_right(X_Measurement, x_bit + xRangeBit), x_bit) + 1;
+                FractionX <= shift_left(resize(X_Measurement((xMeasureBit - x_bit - 1) downto 0), FracBit), 1);
             end if;
             
-            if Y_Measurement(MeasureBit - 1 downto (MeasureBit - y_bit)) = to_unsigned(2**y_bit - 1, y_bit) then
-                YShiftedNext <= Y_Measurement( MeasureBit - 1 downto (MeasureBit - y_bit) );
+            if shift_right(Y_Measurement, 12) >= to_unsigned(2**y_bit - 1, yMeasureBit) then
+                YShifted <= to_unsigned(2**y_bit - 1, y_bit);
+                YShiftedNext <= to_unsigned(2**y_bit - 1, y_bit);
+                FractionY <= to_unsigned(0, FracBit);
             else
-                YShiftedNext <= Y_Measurement( MeasureBit - 1 downto (MeasureBit - y_bit) ) + 1;
+                YShifted <= resize(shift_right(Y_Measurement, 12), y_bit);
+                YShiftedNext <= resize(shift_right(Y_Measurement, 12), y_bit) + 1;
+                FractionY <= shift_left(resize(Y_Measurement(11 downto 0), FracBit), 8); -- The bottom 12 bits determine how far you are to the next bin.
             end if;
-            -- X_Measurement((MeasureBit - x_bit - 1) downto 0) is 10 bit but we want 17 bit
-            FractionX <= shift_left(resize(X_Measurement((MeasureBit - x_bit - 1) downto 0), FracBit), FracBit - x_bit);
-            FractionY <= Y_Measurement(FracBit - 1 downto 0); -- Works as long as Y is 3 bit
+            
             
             ShiftReady <= Measure_Valid;
         else
@@ -119,12 +126,12 @@ PROCESS( clk )
         
 -- P00 * (1 - fraction_x) * (1 - fraction_y) + P01 * (1 - fraction_x) * fraction_y + P10 * fraction_x * (1 - fraction_y) + P11 * fraction_x * fraction_y
 
+        -- clock 2
         if ShiftReady = '1' or Counter /= 0 then
-            -- clock 1
             if counter = 0 then
                 index <= to_integer(XShifted & (y_bit - 1 downto 0 => '0')) + to_integer(YShifted);
-                weight1 <= resize(FracOne - resize(FractionX, FracBit + 1), FracBit + 1);
-                weight2 <= resize(FracOne - resize(FractionY, FracBit + 1), FracBit + 1);
+                weight1 <= resize(FracOne - resize(FractionX, FracBit + 1), FracBit); -- 0i; 20f
+                weight2 <= resize(FracOne - resize(FractionY, FracBit + 1), FracBit); -- 0i; 20f
                 counterD1 <= counter;
                 counter <= counter + 1;
                 validD1 <= '1';
@@ -138,8 +145,8 @@ PROCESS( clk )
             
             elsif counter = 1 then
                 index <= to_integer(XShifted0 & (y_bit - 1 downto 0 => '0')) + to_integer(YShiftedNext0);
-                weight1 <= resize(FracOne - resize(FractionX0, FracBit + 1), FracBit + 1);
-                weight2 <= resize(FractionY0, FracBit + 1);
+                weight1 <= resize(FracOne - resize(FractionX0, FracBit + 1), FracBit); -- 0i; 20f
+                weight2 <= resize(FractionY0, FracBit); -- 0i; 20f
                 counterD1 <= counter;
                 counter <= counter + 1;
                 validD1 <= '1';
@@ -153,8 +160,8 @@ PROCESS( clk )
             
             elsif counter = 2 then
                 index <= to_integer(XShiftedNext1 & (y_bit - 1 downto 0 => '0')) + to_integer(YShifted1);
-                weight1 <= resize(FractionX, FracBit + 1);
-                weight2 <= resize(FracOne - resize(FractionY1, FracBit + 1), FracBit + 1);
+                weight1 <= resize(FractionX, FracBit); -- 0i; 20f
+                weight2 <= resize(FracOne - resize(FractionY1, FracBit + 1), FracBit); -- 0i; 20f
                 counterD1 <= counter;
                 counter <= counter + 1;
                 validD1 <= '1';
@@ -168,34 +175,34 @@ PROCESS( clk )
             
             elsif counter = 3 then
                 index <= to_integer(XShiftedNext2 & (y_bit - 1 downto 0 => '0')) + to_integer(YShiftedNext2);
-                weight1 <= resize(FractionX2, FracBit + 1);
-                weight2 <= resize(FractionY2, FracBit + 1);
+                weight1 <= resize(FractionX2, FracBit); -- 0i; 20f
+                weight2 <= resize(FractionY2, FracBit); -- 0i; 20f
                 counterD1 <= counter;
                 counter <= 0;
-                validD1 <= '1';    
+                validD1 <= '1';
             end if;
         else
             validD1 <= '0'; 
         end if;
         
-        -- clock 2
-        LUTOutput <= BRAGG_LUT(index);
-        weight <= weight1 * weight2;
+        -- clock 3
+        LUTOutput <= BRAGG_LUT(index); -- 12i; 20f
+        weight <= weight1 * weight2; -- 0i; 40f
         counterD2 <= CounterD1;
         validD2 <= validD1;
         
-        -- clock 3
-        LUTWeighted <= LUTOutput * weight;
+        -- clock 4
+        LUTWeighted <= LUTOutput * weight; -- 12i; 60f
         counterD3 <= counterD2;
         validD3 <= validD2;
         
-        -- clock 4
+        -- clock 5
         if validD3 = '1' then
             if counterD3 = 0 then
-                AccumSum <= resize(LUTWeighted, AccumSum'length);
+                AccumSum <= resize(LUTWeighted, AccumSum'length); -- 12i; 60f
                 OutValid <= '0';
             elsif counterD3 = 3 then
-                EstimateOut <= resize(shift_right(AccumSum + LUTWeighted, 2 * FracBit), PointBit);
+                jEstimateOut <= resize(shift_right(AccumSum + LUTWeighted, 2 * FracBit), PointBit); -- 12i; 20f
                 OutValid <= '1';
             else
                 AccumSum <= AccumSum + LUTWeighted;

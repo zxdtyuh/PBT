@@ -13,7 +13,9 @@ entity GK_01 is
     GaussNodes  : integer range 0 to 7 := 7;
     KronrodNodes: integer range 0 to 15 := 15;
     FuncLatency : integer range 0 to 10 := 10; -- How long one node takes to be processed and come back
+    FunctionGKBit: integer range 0 to 49 := 49;
     GjBit  : integer range 0 to 32 := 32 -- Bit of result from G and j functions
+    
     
   );
 
@@ -41,12 +43,12 @@ signal KronrodWeightHold: unsigned( PointBit - 1 downto 0 ) := (others => '0');
 signal GaussWeight   : unsigned( PointBit - 1 downto 0 ) := (others => '0');
 signal GaussWeight1  : unsigned( PointBit - 1 downto 0 ) := (others => '0');
 signal GaussWeightHold   : unsigned( PointBit - 1 downto 0 ) := (others => '0');
-signal FunctionRes   : unsigned( 2 * GjBit - 1 downto 0 ) := (others => '0');
+signal FunctionRes   : unsigned( FunctionGKBit - 1 downto 0 ) := (others => '0');
 signal FunctionValid : STD_LOGIC := '0';
-signal WeightedResult: unsigned( 2 * GjBit + PointBit - 1 downto 0 ) := (others => '0');
-signal GaussWeightedResult: unsigned( 2 * GjBit + PointBit - 1 downto 0 ) := (others => '0');
-signal AccumSum      : unsigned( 2 * GjBit + PointBit downto 0) := (others => '0');
-signal GaussAccumSum : unsigned( 2 * GjBit + PointBit downto 0) := (others => '0');
+signal WeightedResult: unsigned( 85 - 1 downto 0 ) := (others => '0'); -- 13i; 72f
+signal GaussWeightedResult: unsigned( 85 - 1 downto 0 ) := (others => '0');
+signal AccumSum      : unsigned( 86 - 1 downto 0) := (others => '0'); -- 14i; 72f
+signal GaussAccumSum : unsigned( 86 - 1 downto 0) := (others => '0');
 signal SignCounter   : STD_LOGIC := '0';
 signal GaussSignCounter: STD_LOGIC := '0';
 signal NodeCounter   : integer range 0 to 14 := 0;
@@ -100,7 +102,7 @@ Function_Inst : entity work.Function_for_GK
         V_Sig        => V_SigForward,
         V_R          => V_RForward,
         Ready        => FuncReady,
-        GjResult     => FunctionRes,
+        GjResult     => FunctionRes, -- 13i; 36f
         GjResultValid=> FunctionValid
     );
 
@@ -122,9 +124,10 @@ PROCESS( clk )
     
     end if;    
     
+    -- Clock 2
     if FuncReady = '1' and ValidD1 = '0' and GKReady = '0' then
-        KronrodNode <= GK01_NODES(NodeCounter); -- X input
-        KronrodWeightHold <= GK01_KRONROD_WEIGHTS(NodeCounter); -- Weight, need to figure out how to propagate
+        KronrodNode <= GK01_NODES(NodeCounter); -- X input 0i; 36f
+        KronrodWeightHold <= GK01_KRONROD_WEIGHTS(NodeCounter); -- 0i; 36f
         CounterD1 <= NodeCounter;
         ValidD1 <= '1'; -- Triggers function to start next cycle
         
@@ -184,13 +187,13 @@ PROCESS( clk )
     ----------------------------------------------------------------------------------------------------------------------------------
     
     
-    -- Clock 2
+    -- Clock 3
     if FunctionValid = '1' then
-        WeightedResult <= FunctionRes * KronrodWeightHold;
+        WeightedResult <= FunctionRes * KronrodWeightHold; -- 13i; 72f
         CounterD2 <= CounterD1;
         ValidD2 <= '1';
     
-        GaussWeightedResult <= FunctionRes * GaussWeightHold;
+        GaussWeightedResult <= FunctionRes * GaussWeightHold; -- 13i; 72f
         CounterG2 <= CounterG1;
         ValidG2 <= '1';
         
@@ -200,17 +203,17 @@ PROCESS( clk )
     end if;
     
     
-    -- Clock 3
+    -- Clock 4
     -- Kronrod Out
     if validD2 = '1' then                    
             if counterD2 = 0 then
-                AccumSum <= resize(WeightedResult, AccumSum'length);
+                AccumSum <= resize(WeightedResult, AccumSum'length); -- 14i; 72f
                 OutValid <= '0';
             elsif counterD2 = 14 then
-                EstimateOut <= resize(unsigned(shift_right(AccumSum + WeightedResult, 2 * PointBit)), PointBit);
+                EstimateOut <= resize(unsigned(shift_right(AccumSum + WeightedResult, 50)), PointBit); -- 14i; 22f
                 OutValid <= '1';
             else
-                AccumSum <= AccumSum + resize(WeightedResult, AccumSum'length);
+                AccumSum <= AccumSum + resize(WeightedResult, AccumSum'length); -- 14i; 72f
                 OutValid <= '0';
             end if;
         else
@@ -220,11 +223,11 @@ PROCESS( clk )
     -- Gauss Out
     if ValidG2 = '1' then
                 if counterG2 = 0 then
-                    GaussAccumSum <= resize(GaussWeightedResult, GaussAccumSum'length);
+                    GaussAccumSum <= resize(GaussWeightedResult, GaussAccumSum'length); -- 14i; 72f
                     GOutValid <= '0';
                 elsif counterG2 = 6 then
-                    GEstimateOut <= resize(unsigned(shift_right(GaussAccumSum + GaussWeightedResult, 2 * PointBit)), PointBit);
-                    GOutValid <= '1';                    
+                    GEstimateOut <= resize(unsigned(shift_right(GaussAccumSum + GaussWeightedResult, 50)), PointBit); -- 14i; 22f
+                    GOutValid <= '1';              
                 else
                     GaussAccumSum <= GaussAccumSum + GaussWeightedResult;
                     GOutValid <= '0';
