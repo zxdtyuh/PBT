@@ -56,6 +56,7 @@ signal NodeHold      : integer range 0 to 14 := 0;
 signal WeightCounter : integer range 0 to 14 := 0;
 signal GaussNodeCounter   : integer range 0 to 6 := 0;
 signal CounterD1     : integer range 0 to 14 := 0;
+signal ResultCounter : integer range 0 to 14 := 0;
 signal SampleIndex   : integer range 0 to 14 := 0;
 signal CounterD2     : integer range 0 to 14 := 0;
 signal CounterD3     : integer range 0 to 14 := 0;
@@ -127,8 +128,8 @@ PROCESS( clk )
     -- Clock 2
     if FuncReady = '1' and ValidD1 = '0' and GKReady = '0' then
         KronrodNode <= GK01_NODES(NodeCounter); -- X input 0i; 36f
-        KronrodWeightHold <= GK01_KRONROD_WEIGHTS(NodeCounter); -- 0i; 36f
-        CounterD1 <= NodeCounter;
+        KronrodWeightHold <= GK01_KRONROD_WEIGHTS(ResultCounter); -- 0i; 36f
+        CounterD1 <= ResultCounter;
         ValidD1 <= '1'; -- Triggers function to start next cycle
         
         
@@ -190,7 +191,8 @@ PROCESS( clk )
     -- Clock 3
     if FunctionValid = '1' then
         WeightedResult <= FunctionRes * KronrodWeightHold; -- 13i; 72f
-        CounterD2 <= CounterD1;
+        ResultCounter <= ResultCounter + 1;
+        CounterD2 <= ResultCounter;
         ValidD2 <= '1';
     
         GaussWeightedResult <= FunctionRes * GaussWeightHold; -- 13i; 72f
@@ -211,6 +213,7 @@ PROCESS( clk )
                 OutValid <= '0';
             elsif counterD2 = 14 then
                 EstimateOut <= resize(unsigned(shift_right(AccumSum + WeightedResult, 50)), PointBit); -- 14i; 22f
+                ResultCounter <= 0;
                 OutValid <= '1';
             else
                 AccumSum <= AccumSum + resize(WeightedResult, AccumSum'length); -- 14i; 72f

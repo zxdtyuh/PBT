@@ -154,14 +154,8 @@ PROCESS( clk )
         
         --Some Latency between clock 3 & 4 as G and j functions have to compute
         
+        
         -- Clock 4
-        GOut1 <= GOut;
-        GOutValid1 <= GOutValid;
-        GOut2 <= GOut1;
-        GOutValid2 <= GOutValid1; -- latency of 2 between getting G and j output
-        
-        
-        -- Clock 5
         if GOutValid = '1' and jOutValid = '1' then
             GjResult <= GOut * jOut; -- 13i; 36f
             GjResultValid <= '1';
