@@ -30,7 +30,7 @@ def G_true(x):
 input_bits = 10 # Effects the spacing between each x point in the look up table
 output_bits = input_bits + 6  # Effects the scaling factor of the output
 # The bigger, the more integer like
-full_range = 4
+full_range = 8
 
 LUT = [ int( (2**output_bits) * G_true( full_range * x/(2**input_bits) ) ) for x in range( (2**input_bits) ) ]
 # 16777216 * G(8 * x/1024)
@@ -48,15 +48,15 @@ LUT = [ int( (2**output_bits) * G_true( full_range * x/(2**input_bits) ) ) for x
 
 def G_int(x):
   
-  scaled_x = (2**input_bits) * abs(x)/full_range # This will give you the 0 - 1024. this then aligns with the indexing
+  scaled_x = (2**input_bits) * abs(x)/full_range # This will give you the 0 - 1023. this then aligns with the indexing
   
   index = int( scaled_x )
   next_index = min( index+1 , (2**input_bits)-1 )  
   fraction = scaled_x - index
 
-  if index >= 1023:
-    index = 1023
-    next_index = 1023
+  if index >= 2**(input_bits) - 1:  # If index is out of bounds, clamp to the last index
+    index = 2**(input_bits) - 1
+    next_index = 2**(input_bits) - 1
     fraction = 0
   
   P1 , P2 = LUT[ index ] , LUT[ next_index ] 
