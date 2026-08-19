@@ -36,9 +36,9 @@ def j( x , v_B ):
 # Lookup table construction
 # ===============================================================
 
-x_bits = 15   # anything after 15 bit shows no change in error
-y_bits = 5    # anything after 5 bit shows no change in error
-output_bits = 20 # no change after 20 bits
+x_bits = 15   # How many indices for the x dimension. Anything after 15 bit shows no change in error
+y_bits = 5    # How many indices for the y dimension. Anything after 5 bit shows no change in error
+output_bits = 20 # Scaling of the output. No change after 20 bits
 x_start = 0
 y_start = 0.4
 full_x_range = 512
@@ -50,8 +50,9 @@ for Y in range( (2**y_bits) ):
   for X in range((2**x_bits) ):
     LUT[X,Y] = int( (2**output_bits) * j( full_x_range * X/(2**x_bits), full_y_range * Y/(2**y_bits) + y_start ) )
 
-# np.savetxt("Bragg_LUT.csv", LUT.astype(int), delimiter=",")
-
+# ===============================================================
+# Lookup table conversion to hexadecimal for use in VHDL
+# ===============================================================
 
 # full_table_area = 2**x_bits * 2**y_bits
 
@@ -98,6 +99,9 @@ def j_int(x, v_B):
 
   return((int(L1) + int( fraction_x * (L2 - L1) )) / 2**output_bits)
 
+# ===============================================================
+# VHDL output comparison
+# ===============================================================
 
 # print(j_int(((full_x_range) * (520947 / (2**20))) + x_start, ((full_y_range) * (300102 / (2**20))) + y_start))
 # print(j_int(((full_x_range) * (1048 / (2**20))) + x_start, ((full_y_range) * (63917 / (2**20))) + y_start))
@@ -221,7 +225,6 @@ def j_int(x, v_B):
 
 
 
-
 # fig, ax3 = plt.subplots(1)
 
 # x,y = np.linspace(0, x_start+full_x_range - 1, 1000 ) , np.linspace(y_start, y_start+full_y_range -.01, 7) 
@@ -232,3 +235,14 @@ def j_int(x, v_B):
 # ax3.legend()
 
 # plt.show()
+
+fig, ax1 = plt.subplots(1)
+
+x,y = np.linspace(30, x_start+full_x_range - 1, 10 ) , np.linspace(y_start, y_start+full_y_range -.01, 1000)
+for X in x: ax1.plot( y, np.vectorize( j )( X , y ) , label=f"j( {X:.0f} ," + r' $v_B$)')
+ax1.set_title("Exact j function")
+ax1.set_xlabel(r'$v_B$')
+ax1.set_ylabel('j')
+ax1.legend()
+
+plt.show()
