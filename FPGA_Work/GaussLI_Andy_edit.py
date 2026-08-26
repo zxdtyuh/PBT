@@ -71,46 +71,32 @@ def G_int(x):
 # print(G_int(((full_range) * (0 / (2**20)))))
 # print(G_int(((full_range) * (1048575 / (2**20)))))
 
-# fig, (ax1,ax2) = plt.subplots(2)
+fig, (ax1,ax2) = plt.subplots(2)
 
-# x = np.linspace( 0, 3, 100000 )
+x = np.linspace( 0, 4, 100000 )
 
-# y1 = np.vectorize( G_true )(x)
-# ax1.plot(x, y1)
+y1 = np.vectorize( G_true )(x)
+ax1.plot(x, y1)
 
-# y2 = np.vectorize( G_int )(x) / (2**output_bits) 
-# ax1.plot(x, y2, linestyle='dashed')
+y2 = np.vectorize( G_int )(x) 
+ax1.plot(x, y2, linestyle='dashed')
 
-# ax2.plot(x, y1 - y2)
+ax2.plot(x, y1 - y2)
 
-# plt.show()
+plt.show()
 
-# fig, [ax1, ax2, ax3] = plt.subplots(1,3)
 
-# x = np.linspace(0, 4, 1000 )
-# ax1.plot( x, np.vectorize( G_true )( x ) , label=f"G( x )" )
-# ax1.legend()
 
-# x = np.linspace(0, 4, 1000 )
-# ax2.plot( x, np.vectorize( G_int )( x ), label=f"G( x )" )
-# ax2.legend()
+fig, (ax1,ax2) = plt.subplots(2)
 
-# x = np.linspace(0, 4, 1000 )
-# ax3.plot( x, ((np.vectorize( G_int )( x )) - np.vectorize( G_true )( x )), label=f"G( x )" )
-# ax3.legend()
+x = np.linspace( 0, 3, 100000 )
 
-# plt.show()
+y1 = np.vectorize( G_true )(x)
+ax1.plot(x, y1)
 
-# fig, (ax1,ax2) = plt.subplots(2)
+y2 = np.vectorize( G_int )(x) 
+ax1.plot(x, y2, linestyle='dashed')
 
-# x = np.linspace( -3, 3, 100000 )
+ax2.plot(x, (y1 - y2) / y1)
 
-# y1 = np.vectorize( G_true )(x)
-# ax1.plot(x, y1)
-
-# y2 = np.vectorize( G_int )(x)
-# ax1.plot(x, y2, linestyle='dashed')
-
-# ax2.plot(x, y1 - y2)
-
-# plt.show()
+plt.show()
