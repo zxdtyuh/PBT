@@ -1,7 +1,7 @@
 import subprocess
 import urllib.parse
 
-v4dir   = "/home/pi/GUI/v4"
+v4dir   = ""
 script  = "executeFTDI.sh"
 
 _process = None  # Track the running process
